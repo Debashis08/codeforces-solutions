@@ -1,0 +1,37 @@
+name: codeforces-solutions-ci-cd
+
+on:
+  push:
+    branches: [ main, release ]
+  pull_request:
+    branches: [ main, release ]
+
+jobs:
+  lint-build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ clang-tidy
+
+    - name: Run clang-tidy
+      run: |
+        find source -name '*.cpp' | while read file; do
+          echo "Running clang-tidy on $file"
+          clang-tidy "$file" -- -std=c++17 || exit 1
+        done
+
+    - name: Build allTestRunner
+      run: |
+        g++ test-runner/allTestRunner.cpp -std=c++17 -o test-runner/allTestRunner
+
+    - name: Make executable
+      run: chmod +x test-runner/allTestRunner
+
+    - name: Run all tests
+      run: ./test-runner/allTestRunner
