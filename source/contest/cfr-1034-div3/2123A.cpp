@@ -15,9 +15,9 @@ void FastIO()
 class Solution
 {
 public:
-	void Solve()
+	void Solve(int n)
 	{
-		
+		cout << ((n % 4 == 0) ? "Bob" : "Alice") << endl;
 	}
 };
 
@@ -25,6 +25,16 @@ int main()
 {
 	FastIO();
 
+	int t;
+	cin >> t;
+	Solution solution;
+
+	while (t--)
+	{
+		int n;
+		cin >> n;
+		solution.Solve(n);
+	}
 
 	return 0;
 }
