@@ -1,0 +1,22 @@
+Test Case 1:
+Input:
+6
+5 2
+11011
+7 4
+1011011
+6 1
+010000
+4 1
+1111
+8 3
+10110110
+6 4
+111111
+Output:
+Bob
+Alice
+Alice
+Bob
+Bob
+Alice
