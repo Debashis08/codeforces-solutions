@@ -7,6 +7,28 @@ Tags
 
 Problem Description
 
+Minimize Fixed Points
+
+Time limit per test: 3 seconds
+Memory limit per test: 256 megabytes
+
+Call a permutation p of length n good if gcd(p[i], i) > 1 for all 2 <= i <= n.
+Find a good permutation with the minimum number of fixed points across all good permutations of length n.
+If there are multiple such permutations, print any of them.
+
+Note:
+
+- A permutation of length n is an array that contains every integer from 1 to n exactly once, in any order.
+- gcd(x, y) denotes the greatest common divisor (GCD) of x and y.
+- A fixed point of a permutation p is an index j (1 <= j <= n) such that p[j] == j.
+
+Input
+The first line contains an integer t (1 <= t <= 10^4) — the number of test cases.
+Each of the next t lines contains one integer n (2 <= n <= 10^5) — the length of the permutation.
+It is guaranteed that the sum of all n over all test cases does not exceed 10^5.
+
+Output
+For each test case, output on a single line a good permutation of length n with the minimum number of fixed points.
 
 
 */
@@ -75,6 +97,8 @@ private:
 public:
 	void Solve()
 	{
+		int n;
+		cin >> n;
 
 	}
 };
@@ -82,7 +106,13 @@ public:
 int main()
 {
 	FastIO();
-
+	int t;
+	cin >> t;
+	Solution sol;
+	while (t--)
+	{
+		sol.Solve();
+	}
 
 	return 0;
 }
