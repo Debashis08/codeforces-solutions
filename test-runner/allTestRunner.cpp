@@ -85,14 +85,20 @@ int main()
     Helper helper;
     bool isAnyTestFailed = false;
 
+    int totalTests = 0;
+    int passedTests = 0;
+    int failedTests = 0;
+    int skippedTests = 0;
+
     fs::path scriptDir;
 
     #ifdef _WIN32
-    scriptDir = fs::current_path();  // fallback for Windows
+        scriptDir = fs::current_path();  // fallback for Windows
     #else
-    scriptDir = fs::canonical("/proc/self/exe").parent_path();  // works for Linux (GitHub Actions)
-    #endif         // e.g., /home/runner/work/codeforces-solutions/test-runner
-    fs::path rootDir = scriptDir.parent_path();             // Go one level up
+        scriptDir = fs::canonical("/proc/self/exe").parent_path();  // works for Linux (GitHub Actions)
+    #endif
+
+    fs::path rootDir = scriptDir.parent_path();
     fs::path sourceDir = rootDir / "source";
     fs::path testDataDir = rootDir / "test-data";
 
@@ -115,6 +121,7 @@ int main()
             if (std::system(compileCommand.c_str()) != 0)
             {
                 std::cerr << "Compilation failed for: " << sourcePath << "\n";
+                skippedTests++;
                 continue;
             }
 
@@ -122,11 +129,14 @@ int main()
             if (testCases.empty())
             {
                 std::cerr << "No test cases found for: " << testCasePath << "\n";
+                skippedTests++;
                 continue;
             }
 
             for (size_t i = 0; i < testCases.size(); i++)
             {
+                totalTests++;
+
                 std::ofstream in("temp_input.txt");
                 in << testCases[i].inputBlock;
                 in.close();
@@ -147,12 +157,14 @@ int main()
                 if (expected == actual)
                 {
                     std::cout << "Test Case " << (i + 1) << ": " << COLOR_GREEN_BOLD << "Passed" << COLOR_RESET << '\n';
+                    passedTests++;
                 }
                 else
                 {
                     std::cout << "Test Case " << (i + 1) << ": " << COLOR_RED_BOLD << "Failed" << COLOR_RESET << '\n';
                     std::cout << "Expected:\n" << expected << "\n";
                     std::cout << "Got:\n" << actual << "\n";
+                    failedTests++;
                     isAnyTestFailed = true;
                 }
             }
@@ -162,6 +174,14 @@ int main()
             std::remove("solution_test_exec.exe");
         }
     }
+
+    // Print summary report
+    std::cout << "\n========= Test Summary =========\n";
+    std::cout << "Total Tests   : " << totalTests << "\n";
+    std::cout << "Passed        : " << COLOR_GREEN_BOLD << passedTests << COLOR_RESET << "\n";
+    std::cout << "Failed        : " << COLOR_RED_BOLD << failedTests << COLOR_RESET << "\n";
+    std::cout << "Skipped       : " << skippedTests << "\n";
+    std::cout << "================================\n";
 
     return isAnyTestFailed ? 1 : 0;
 }
