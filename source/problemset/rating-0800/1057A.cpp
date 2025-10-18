@@ -1,15 +1,9 @@
-/*
-Problem Id = 1057A
-Tags = #dfs
-*/
-
 #include <iostream>
 #include <vector>
 #include <string>
 using namespace std;
 
 const int MOD = 1e9 + 7;
-const int INF = 1e9;
 
 void FastIO()
 {
