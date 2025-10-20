@@ -134,9 +134,8 @@ int main()
         }
 
         std::string expected = helper.Trim(testCases[i].expectedOutputBlock);
-        std::string actual = helper.Trim(oss.str());
+        std::string actual = helper.Trim(ossActual.str());
 
-        std::cout << "Test Case " << (i + 1) << ": ";
         if (expected == actual)
         {
             std::cout << "Test Case " << (i + 1) << ": " << COLOR_GREEN_BOLD << "Passed" << COLOR_RESET << '\n';
