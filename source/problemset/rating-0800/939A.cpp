@@ -60,9 +60,27 @@ private:
 	}
 
 public:
-	void Solve()
+	void Solve(vector<int>& vec)
 	{
+		int n = vec.size();
+		bool flag = false;
 
+		for (int i = 0; i < n; i++)
+		{
+			if (vec[vec[vec[i]]] == i)
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (flag == true)
+		{
+			cout << "YES" << endl;
+		}
+		else
+		{
+			cout << "NO" << endl;
+		}
 	}
 };
 
@@ -70,6 +88,18 @@ int main()
 {
 	FastIO();
 
+	long n;
+	cin >> n;
+	vector<int> vec;
+	int x;
+	for (int i = 0; i < n; i++)
+	{
+		cin >> x;
+		vec.push_back(x - 1);
+	}
+	
+	Solution solution;
+	solution.Solve(vec);
 
 	return 0;
 }
