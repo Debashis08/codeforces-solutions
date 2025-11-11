@@ -1,0 +1,63 @@
+name: codeforces-solutions-validate
+
+# Triggers when a PR is opened or updated, targeting 'release' OR 'main'
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - release
+      - main
+
+jobs:
+  # --- Job 1: The "Gate" Job ---
+  # This job runs first to validate the PR path.
+  enforce-branch-strategy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block invalid PR path
+        # This step ONLY runs if the path is INVALID
+        # Wrap the entire logical operation in ${{...}}
+        if: ${{ !((startsWith(github.event.pull_request.head.ref, 'feature-') && github.event.pull_request.base.ref == 'release') || (github.event.pull_request.head.ref == 'release' && github.event.pull_request.base.ref == 'main')) }}
+        run: |
+          echo "::error:: This PR path (${{ github.event.pull_request.head.ref }} -> ${{ github.event.pull_request.base.ref }}) is not allowed."
+          echo "::error:: Allowed paths are: 'feature-*' -> 'release' OR 'release' -> 'main'."
+          exit 1
+      
+      - name: Approve valid PR path
+        # This step ONLY runs if the path is VALID (for logging)
+        if: (startsWith(github.event.pull_request.head.ref, 'feature-') && github.event.pull_request.base.ref == 'release') || (github.event.pull_request.head.ref == 'release' && github.event.pull_request.base.ref == 'main')
+        run: |
+          echo "Valid PR path. Proceeding to build and test..."
+
+  # --- Job 2: Lint, Build, and Test ---
+  lint-build-test:
+    # This job WAITS for 'enforce-branch-strategy' to succeed
+    needs: enforce-branch-strategy
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ clang-tidy
+
+    - name: Run clang-tidy
+      run: |
+        find source -name '*.cpp' | while read file; do
+          echo "Running clang-tidy on $file"
+          clang-tidy "$file" -- -std=c++17 || exit 1
+        done
+
+    - name: Build allTestRunner
+      run: |
+        g++ test-runner/allTestRunner.cpp -std=c++17 -o test-runner/allTestRunner
+
+    - name: Make executable
+      run: chmod +x test-runner/allTestRunner
+
+    - name: Run all tests
+      run: ./test-runner/allTestRunner
