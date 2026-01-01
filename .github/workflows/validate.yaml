@@ -1,63 +1,94 @@
 name: validate
 
-# Triggers when a PR is opened or updated, targeting 'release' OR 'main'
 on:
   pull_request:
     types: [opened, synchronize]
     branches:
-      - release
-      - main
+      - 'release/*'
+      - 'main'
 
 jobs:
-  # --- Job 1: The "Gate" Job ---
-  # This job runs first to validate the PR path.
-  enforce-branch-strategy:
+  # job 1: Branch Policy check
+  validate-branch-policy:
     runs-on: ubuntu-latest
     steps:
-      - name: Block invalid PR path
-        # This step ONLY runs if the path is INVALID
-        # Wrap the entire logical operation in ${{...}}
-        if: ${{ !((startsWith(github.event.pull_request.head.ref, 'feature-') && github.event.pull_request.base.ref == 'release') || (github.event.pull_request.head.ref == 'release' && github.event.pull_request.base.ref == 'main')) }}
+      - name: Verify Branch Strategy
         run: |
-          echo "::error:: This PR path (${{ github.event.pull_request.head.ref }} -> ${{ github.event.pull_request.base.ref }}) is not allowed."
-          echo "::error:: Allowed paths are: 'feature-*' -> 'release' OR 'release' -> 'main'."
-          exit 1
-      
-      - name: Approve valid PR path
-        # This step ONLY runs if the path is VALID (for logging)
-        if: (startsWith(github.event.pull_request.head.ref, 'feature-') && github.event.pull_request.base.ref == 'release') || (github.event.pull_request.head.ref == 'release' && github.event.pull_request.base.ref == 'main')
-        run: |
-          echo "Valid PR path. Proceeding to build and test..."
+          HEAD="${{ github.head_ref }}"
+          BASE="${{ github.base_ref }}"
+          echo "Verifying path: $HEAD -> $BASE"
+          
+          if [[ "$HEAD" == feature/* && "$BASE" == release/* ]]; then
+            echo "Pull Request is allowed: $HEAD -> $BASE."
+            exit 0
+          elif [[ "$HEAD" == release/* && "$BASE" == main ]]; then
+            echo "Pull Request is allowed: $HEAD -> $BASE."
+            exit 0
+          else
+            echo "::error::Invalid Pull Request from '$HEAD' -> '$BASE'."
+            echo "Allowed: 'feature/*'->'release/*' OR 'release/*'->'main'."
+            exit 1
+          fi
 
-  # --- Job 2: Lint, Build, and Test ---
-  lint-build-test:
-    # This job WAITS for 'enforce-branch-strategy' to succeed
-    needs: enforce-branch-strategy
-
+  # job 2: Static code analysis
+  lint-code:
+    needs: validate-branch-policy
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y g++ clang-tidy
+      - name: Install clang-tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy
 
-    - name: Run clang-tidy
-      run: |
-        find source -name '*.cpp' | while read file; do
-          echo "Running clang-tidy on $file"
-          clang-tidy "$file" -- -std=c++17 || exit 1
-        done
+      - name: Run clang-tidy
+        run: |
+          find source -name '*.cpp' | while read file; do
+            echo "clang-tidy checking on $file"
+            clang-tidy "$file" -- -std=c++17 || exit 1
+          done
 
-    - name: Build allTestRunner
-      run: |
-        g++ test-runner/allTestRunner.cpp -std=c++17 -o test-runner/allTestRunner
+  # job 3: Build Project 
+  build-project:
+    needs: lint-code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Make executable
-      run: chmod +x test-runner/allTestRunner
+      - name: Install g++
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++
 
-    - name: Run all tests
-      run: ./test-runner/allTestRunner
+      - name: Build allTestRunner
+        run: |
+          g++ test-runner/allTestRunner.cpp -std=c++17 -o test-runner/allTestRunner
+
+      # UPLOAD THE BINARY so the Test job can see it
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-binary
+          path: test-runner/allTestRunner
+          retention-days: 1
+
+  # job 4: Run all tests
+  run-all-tests:
+    needs: build-project
+    runs-on: ubuntu-latest
+    steps:
+      # DOWNLOAD THE BINARY from the Build job
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-binary
+          path: test-runner
+
+      - name: Make executable
+        run: chmod +x test-runner/allTestRunner
+
+      - name: Run all tests
+        run: ./test-runner/allTestRunner
