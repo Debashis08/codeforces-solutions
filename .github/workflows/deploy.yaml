@@ -3,122 +3,144 @@ name: deploy
 # Triggers only when a PR to 'main' is closed
 on:
   pull_request:
-    types: [closed] # Run when a PR is closed
+    types: [closed]
     branches:
-      - 'main'      # Only when the PR's target branch is 'main'
+      - 'main'
 
-# Permissions required for the tag/release job
 permissions:
-  contents: write      # To create/push tags AND create releases
-  pull-requests: read  # To read the PR body
+  contents: write      # Required to push tags and create releases
+  pull-requests: read  # Required to read PR body for checkboxes
 
 jobs:
-  # --- Job 1: Create Tag and Release ---
-  create-tag-and-release:
-  
-    # This job only runs if:
-    # 1. The PR was actually merged (implicit from 'needs', but good to be explicit).
-    # 2. The PR was from a branch named exactly 'release'.
-    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'release'
+  # job 1: Deployment Validation
+  # Verifies the PR is merged, comes from a release/* branch, and has a bump type.
+  deployment-validation:
     runs-on: ubuntu-latest
-
+    # Define outputs to pass to the next job
+    outputs:
+      bump_type: ${{ steps.get_bump_type.outputs.bump_type }}
+      
     steps:
-      # Step 1: Check out the code on the 'main' branch
-      # fetch-depth: 0 is crucial to get all tags and history
+      - name: Verify Merge and Branch Policy
+        run: |
+          IS_MERGED="${{ github.event.pull_request.merged }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          
+          echo "PR Merged: $IS_MERGED"
+          echo "Source Branch: $HEAD_REF"
+          
+          # 1. Check if PR was actually merged (not just closed)
+          if [[ "$IS_MERGED" != "true" ]]; then
+            echo "::notice::PR was closed without merging. Skipping release."
+            exit 0
+          fi
+
+          # 2. Check if source branch starts with 'release/'
+          if [[ "$HEAD_REF" != release/* ]]; then
+            echo "::error::Invalid source branch. Releases must originate from 'release/*' branches."
+            exit 1
+          fi
+          
+          echo "Branch policy checks passed."
+
+      - name: Determine Version Bump Type
+        id: get_bump_type
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Check checkboxes in PR Body: [x] Major, [x] Minor, etc.
+          if echo "$PR_BODY" | grep -q '\[x\] Major'; then
+            echo "bump_type=major" >> $GITHUB_OUTPUT
+            echo "Detected bump: MAJOR"
+          elif echo "$PR_BODY" | grep -q '\[x\] Minor'; then
+            echo "bump_type=minor" >> $GITHUB_OUTPUT
+            echo "Detected bump: MINOR"
+          elif echo "$PR_BODY" | grep -q '\[x\] Patch'; then
+            echo "bump_type=patch" >> $GITHUB_OUTPUT
+            echo "Detected bump: PATCH"
+          else
+            echo "::error::No version bump detected. Please check [x] Major, [x] Minor, or [x] Patch in the PR body."
+            exit 1
+          fi
+
+  # job 2: Create GitHub Tag and Release
+  create-github-tag-and-release:
+    needs: deployment-validation
+    runs-on: ubuntu-latest
+    env:
+      BUMP_TYPE: ${{ needs.deployment-validation.outputs.bump_type }}
+      
+    steps:
       - name: Checkout main branch
         uses: actions/checkout@v4
         with:
           ref: 'main'
-          fetch-depth: 0 
+          fetch-depth: 0 # Crucial for calculating history/tags
 
-      # Step 2: Configure Git with bot credentials
       - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      # Step 3: Parse the PR body to find the version bump type
-      - name: Determine Version Bump
-        id: version_bump
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
+      # Step A: Find the existing tag
+      - name: Get Latest Tag
+        id: get_latest_tag
         run: |
-          if echo "$PR_BODY" | grep -q '\[x\] Major'; then
-            echo "bump_type=major" >> $GITHUB_OUTPUT
-          elif echo "$PR_BODY" | grep -q '\[x\] Minor'; then
-            echo "bump_type=minor" >> $GITHUB_OUTPUT
-          elif echo "$PR_BODY" | grep -q '\[x\] Patch'; then
-            echo "bump_type=patch" >> $GITHUB_OUTPUT
-          else
-            echo "No version bump type selected in PR body. ([x] Major, [x] Minor, or [x] Patch)."
-            exit 1
-          fi
-
-      # Step 4: Get the latest tag
-      - name: Get latest tag
-        id: last_tag
-        run: |
-          # Fetch all tags from remote just in case
+          # 1. Fetch all tags
           git fetch --tags
           
-          # Find the latest tag matching vX.Y.Z format, sort by version, get the highest
+          # 2. Find latest tag (Sort by version number, take top)
           LATEST_TAG=$(git tag --list 'v*.*.*' --sort=-v:refname | head -n 1)
           
           if [ -z "$LATEST_TAG" ]; then
-            echo "No previous vX.Y.Z tag found. Starting from v0.0.0."
+            echo "No previous tags found. Defaulting to v0.0.0"
             LATEST_TAG="v0.0.0"
           fi
           
-          echo "Last tag: $LATEST_TAG"
-          echo "last_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest Tag: $LATEST_TAG"
+          
+          # Expose this variable to the next step
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-      # Step 5: Calculate the new tag based on the bump type
-      - name: Calculate new tag
-        id: new_tag
+      # Step B: Do the math
+      - name: Calculate New Tag
+        id: calc_new_tag
+        env:
+          # Pull the tag from the previous step
+          LATEST_TAG: ${{ steps.get_latest_tag.outputs.latest_tag }} 
+          # Assuming BUMP_TYPE is set in the Job 'env' as per previous context
         run: |
-          BUMP_TYPE=${{ steps.version_bump.outputs.bump_type }}
-          LAST_TAG=${{ steps.last_tag.outputs.last_tag }}
+          echo "Base Tag: $LATEST_TAG"
+          echo "Bump Type: $BUMP_TYPE"
           
-          # Strip 'v' prefix
-          VERSION=${LAST_TAG#v}
-          
-          # Split into parts
+          # 1. Parse Version
+          VERSION=${LATEST_TAG#v} # Remove 'v'
           IFS='.' read -r -a parts <<< "$VERSION"
           MAJOR=${parts[0]}
           MINOR=${parts[1]}
           PATCH=${parts[2]}
           
-          # Increment based on bump type
+          # 2. Increment
           case "$BUMP_TYPE" in
-            "major")
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-              ;;
-            "minor")
-              MINOR=$((MINOR + 1))
-              PATCH=0
-              ;;
-            "patch")
-              PATCH=$((PATCH + 1))
-              ;;
+            "major") MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            "minor") MINOR=$((MINOR + 1)); PATCH=0 ;;
+            "patch") PATCH=$((PATCH + 1)) ;;
           esac
           
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "New tag will be: $NEW_TAG"
-
-      # Step 6: Create and push the new tag
-      - name: Create and push new tag
+      
+      - name: Create and push new Git tag
         run: |
-          NEW_TAG=${{ steps.new_tag.outputs.new_tag }}
+          NEW_TAG=${{ steps.calc_new_tag.outputs.new_tag }}
           MERGE_COMMIT_SHA=${{ github.event.pull_request.merge_commit_sha }}
           
           echo "Tagging commit $MERGE_COMMIT_SHA as $NEW_TAG"
           git tag $NEW_TAG $MERGE_COMMIT_SHA
           git push origin $NEW_TAG
 
-      # Step 7: Extract Release Summary from PR Body
       - name: Extract Release Summary
         id: extract_summary
         env:
@@ -138,27 +160,17 @@ jobs:
           echo "$SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      # Step 8: Create GitHub Release
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_TAG: ${{ steps.new_tag.outputs.new_tag }}
-          SUMMARY: ${{ steps.extract_summary.outputs.summary }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
+          NEW_TAG: ${{ steps.calc_new_tag.outputs.new_tag }}
+          NOTES: ${{ steps.extract_summary.outputs.summary }}
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
-          # Check if summary is empty, and provide a default
-          if [ -z "$SUMMARY" ]; then
-            echo "Release summary was empty. Using PR title as notes."
-            RELEASE_NOTES="$PR_TITLE"
-          else
-            RELEASE_NOTES="$SUMMARY"
-          fi
+          # Default to PR title if notes are empty
+          if [ -z "$NOTES" ]; then NOTES="$TITLE"; fi
           
-          # Create the release using the GitHub CLI
-          # --latest: Marks this as the latest official release
-          # --title: Set to just the tag name as requested
-          gh release create $NEW_TAG \
+          gh release create "$NEW_TAG" \
             --title "$NEW_TAG" \
-            --notes "$RELEASE_NOTES" \
-            --target ${{ github.event.pull_request.merge_commit_sha }} \
+            --notes "$NOTES" \
             --latest
