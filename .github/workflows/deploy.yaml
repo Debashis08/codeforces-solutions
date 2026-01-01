@@ -32,7 +32,7 @@ jobs:
           # 1. Check if PR was actually merged (not just closed)
           if [[ "$IS_MERGED" != "true" ]]; then
             echo "::notice::PR was closed without merging. Skipping release."
-            exit 0
+            exit 1
           fi
 
           # 2. Check if source branch starts with 'release/'
