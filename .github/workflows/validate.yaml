@@ -1,4 +1,4 @@
-name: codeforces-solutions-validate
+name: validate
 
 # Triggers when a PR is opened or updated, targeting 'release' OR 'main'
 on:

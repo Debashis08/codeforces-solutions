@@ -1,4 +1,4 @@
-name: codeforces-solutions-deploy
+name: deploy
 
 # Triggers only when a PR to 'main' is closed
 on:
