@@ -80,6 +80,9 @@ jobs:
     needs: build-project
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       # DOWNLOAD THE BINARY from the Build job
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
