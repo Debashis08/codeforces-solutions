@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: compiled-binary
-          path: test-runner/allTestRunner
+          path: tests/allTestRunner
           retention-days: 1
 
   # job 4: Run all tests
