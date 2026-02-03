@@ -147,8 +147,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: release-drafter/release-drafter@v6
         with:
-          # Uses your .github/release.yml to categorize changes
-          config-name: release.yml
+          # Uses your .github/release.yaml to categorize changes
+          config-name: release.yaml
           
           # We force it to use the tag you just calculated and pushed
           tag: ${{ steps.calc_new_tag.outputs.new_tag }}
