@@ -1,35 +1,26 @@
 ### Pull Request Guidelines
 
-1. While creating Pull Request from feature to release branch, please provide proper description and check the boxes for specific changes made in this feature branch.
-2. While creating Pull Request from release to main branch, please check the appropriate version bump from the provided list.
+1. **feature → release:** Please provide a description of the solution or fix. The `auto-labeler` bot will automatically label this PR based on the files changed.
+2. **release → main:** **Please select the version bump type**, release notes will be auto-generated from the merged feature PRs.
 
----
-### PR from feature to release
+### feature to release
+*(Fill this out when merging a feature branch into a release branch)*
 
-**Description**
-
-
-**Type of Change**
-
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Core update
-- [ ] Tests added
-- [ ] Documentation update
+**Description Category**
+- [ ] Contest Solution
+- [ ] Problemset Solution
+- [ ] Tooling
+- [ ] Documentation
 
 **Notes**
 
 
-----
-### PR from release to main
 
-**Release Summary**
 
+### release to main
+*(Fill this out ONLY when merging a release branch into main)*
 
 **Version Bump Type**
 - [ ] Major
 - [ ] Minor
 - [ ] Patch
-
-**Notes**
-

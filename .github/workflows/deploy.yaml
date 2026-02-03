@@ -140,37 +140,21 @@ jobs:
           echo "Tagging commit $MERGE_COMMIT_SHA as $NEW_TAG"
           git tag $NEW_TAG $MERGE_COMMIT_SHA
           git push origin $NEW_TAG
-
-      - name: Extract Release Summary
-        id: extract_summary
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          # Use an awk "state machine" to extract text between the two markers.
-          # We use "<<<" (a "here string") to safely pass the multiline $PR_BODY to awk.
-          # We must escape the '*' characters with '\' for the regex.
-          
-          # 1. /\*\*Release Summary\*\*/{f=1; next} : When we see the START marker, set flag 'f' to 1 and skip to the next line.
-          # 2. /\*\*Version Bump Type\*\*/{f=0}      : When we see the END marker, set flag 'f' to 0.
-          # 3. f                                 : If flag 'f' is 1 (true), print the current line.
-          SUMMARY=$(awk '/\*\*Release Summary\*\*/{f=1; next} /\*\*Version Bump Type\*\*/{f=0} f' <<< "$PR_BODY")
-
-          # Use multiline string syntax for GITHUB_OUTPUT
-          echo "summary<<EOF" >> $GITHUB_OUTPUT
-          echo "$SUMMARY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
+      
+      # Step D: Generate Auto-Notes and Publish
       - name: Create GitHub Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_TAG: ${{ steps.calc_new_tag.outputs.new_tag }}
-          NOTES: ${{ steps.extract_summary.outputs.summary }}
-          TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          # Default to PR title if notes are empty
-          if [ -z "$NOTES" ]; then NOTES="$TITLE"; fi
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: release-drafter/release-drafter@v6
+        with:
+          # Uses your .github/release.yml to categorize changes
+          config-name: release.yml
           
-          gh release create "$NEW_TAG" \
-            --title "$NEW_TAG" \
-            --notes "$NOTES" \
-            --latest
+          # We force it to use the tag you just calculated and pushed
+          tag: ${{ steps.calc_new_tag.outputs.new_tag }}
+          name: "Release ${{ steps.calc_new_tag.outputs.new_tag }}"
+          version: ${{ steps.calc_new_tag.outputs.new_tag }}
+          
+          # This makes it a real release (not a draft)
+          publish: true
+        
