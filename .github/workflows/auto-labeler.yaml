@@ -1,0 +1,21 @@
+name: auto-labeler
+
+# Run this on every PR open or update
+on: 
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  # Required to add labels
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          # This tells it to look at your .github/labeler.yaml
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          sync-labels: true
