@@ -99,8 +99,8 @@ int main()
     #endif
 
     fs::path rootDir = scriptDir.parent_path();
-    fs::path sourceDir = rootDir / "source";
-    fs::path testDataDir = rootDir / "test-data";
+    fs::path sourceDir = rootDir / "src";
+    fs::path testDataDir = rootDir / "tests";
 
     if (!fs::exists(sourceDir))
     {
@@ -115,7 +115,7 @@ int main()
             std::string sourcePath = entry.path().string();
             std::string testCasePath = helper.GetTestDataFilePath(entry.path(), sourceDir, testDataDir);
 
-            std::cout << "\n--- Testing: " << fs::relative(entry.path(), sourceDir).string() << " ---\n";
+            std::cout << "\nTesting: " << fs::relative(entry.path(), sourceDir).string() << "\n";
 
             std::string compileCommand = "g++ \"" + sourcePath + "\" -o " EXECUTABLE_NAME " 2> compile_errors.txt";
             if (std::system(compileCommand.c_str()) != 0)
@@ -176,12 +176,11 @@ int main()
     }
 
     // Print summary report
-    std::cout << "\n========= Test Summary =========\n";
+    std::cout << "\nTest Summary\n";
     std::cout << "Total Tests   : " << totalTests << "\n";
     std::cout << "Passed        : " << COLOR_GREEN_BOLD << passedTests << COLOR_RESET << "\n";
     std::cout << "Failed        : " << COLOR_RED_BOLD << failedTests << COLOR_RESET << "\n";
     std::cout << "Skipped       : " << skippedTests << "\n";
-    std::cout << "================================\n";
 
     return isAnyTestFailed ? 1 : 0;
 }
