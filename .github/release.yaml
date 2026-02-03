@@ -1,0 +1,14 @@
+changelog:
+  categories:
+    - title: 'Contest Updates'
+      labels:
+        - 'contest'
+    - title: 'Problemset Additions'
+      labels:
+        - 'problemset'
+    - title: 'Infrastructure and Tooling'
+      labels:
+        - 'tooling'
+    - title: 'Documentation'
+      labels:
+        - 'documentation'
