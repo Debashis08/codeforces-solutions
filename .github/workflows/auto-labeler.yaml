@@ -14,6 +14,7 @@ jobs:
   assign-labels:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       # 1. Standard File-based Labeler (Contest vs Problemset)
       - name: Assign Labels Based on Changes
         id: labeler
