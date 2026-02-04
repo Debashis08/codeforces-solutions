@@ -19,8 +19,9 @@ jobs:
         id: labeler
         uses: actions/labeler@v5
         with:
+          # This tells it to look at your .github/labeler.yaml
+          configuration-path: .github/labeler.yaml
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          configuration-path: .github/auto-labeler.yaml
           sync-labels: true
 
       # 2. NEW: Branch-based Labeler (Ignore Release Branches)
