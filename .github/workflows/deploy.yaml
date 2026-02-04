@@ -152,7 +152,7 @@ jobs:
           
           # We force it to use the tag you just calculated and pushed
           tag: ${{ steps.calc_new_tag.outputs.new_tag }}
-          name: "Release ${{ steps.calc_new_tag.outputs.new_tag }}"
+          name: "${{ steps.calc_new_tag.outputs.new_tag }}"
           version: ${{ steps.calc_new_tag.outputs.new_tag }}
           
           # This makes it a real release (not a draft)
