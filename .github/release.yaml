@@ -1,11 +1,12 @@
 # Defines how the release body is formatted. 
 # $CHANGES is where the categorized list will appear.
 template: |
-  ### Changes in this Release
+  # Changes in this Release
   $CHANGES
   
   ---
-  *Full Changelog: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$NEW_TAG*
+  Full Changelog: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$RESOLVED_VERSION
+
 
 # These categories match the labels from your labeler.yaml
 categories:
@@ -25,3 +26,7 @@ categories:
 # Fallback for anything that doesn't match the above
 exclude-labels:
   - 'skip-changelog'
+
+replacers:
+  - search: '/^## /gm'
+    replace: '### '
