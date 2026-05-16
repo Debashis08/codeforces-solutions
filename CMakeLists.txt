@@ -20,9 +20,9 @@ foreach(SOURCE_FILE IN LISTS PROBLEM_FILES)
     # Example output: "contests/cfr-1034-div3/2123A.cpp"
     file(RELATIVE_PATH REL_SOURCE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src" "${SOURCE_FILE}")
 
-    # Replace '.cpp' with '.txt'
-    # Example output: "contests/cfr-1034-div3/2123A.txt"
-    string(REPLACE ".cpp" ".txt" REL_TEST_PATH "${REL_SOURCE_PATH}")
+    # Replace '.cpp' with '_debug.txt'
+    # Example output: "contests/cfr-1034-div3/2123A_debug.txt"
+    string(REPLACE ".cpp" "_debug.txt" REL_TEST_PATH "${REL_SOURCE_PATH}")
 
     # Construct the absolute path to where the text file SHOULD be
     set(TEST_FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/${REL_TEST_PATH}")
@@ -44,7 +44,7 @@ foreach(SOURCE_FILE IN LISTS PROBLEM_FILES)
             if (FILE* f = fopen(\"${TEST_FILE_PATH}\", \"r\")) {
                 fclose(f); 
                 freopen(\"${TEST_FILE_PATH}\", \"r\", stdin);
-                fprintf(stderr, \"[Injector] SUCCESS: Reading from .txt file!\\n\");
+                fprintf(stderr, \"[Injector] SUCCESS: Reading from _debug.txt file!\\n\");
             } else {
                 fprintf(stderr, \"[Injector] FILE NOT FOUND. Waiting for keyboard input...\\n\");
             }

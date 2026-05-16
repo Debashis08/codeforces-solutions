@@ -38,6 +38,7 @@ public:
 
 int main()
 {
+	FastIO();
 	int n;
 	cin >> n;
 	vector<int> vec(n + 1, -1);
