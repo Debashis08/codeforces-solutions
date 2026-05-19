@@ -178,8 +178,8 @@ int main()
     // Print summary report
     std::cout << "\nTest Summary\n";
     std::cout << "Total Tests   : " << totalTests << "\n";
-    std::cout << "Passed        : " << COLOR_GREEN_BOLD << passedTests << COLOR_RESET << "\n";
-    std::cout << "Failed        : " << COLOR_RED_BOLD << failedTests << COLOR_RESET << "\n";
+    std::cout << "Passed        : " << (passedTests > 0 ? COLOR_GREEN_BOLD : COLOR_RESET) << passedTests << COLOR_RESET << "\n";
+    std::cout << "Failed        : " << (failedTests > 0 ? COLOR_RED_BOLD : COLOR_RESET) << failedTests << COLOR_RESET << "\n";
     std::cout << "Skipped       : " << skippedTests << "\n";
 
     return isAnyTestFailed ? 1 : 0;
