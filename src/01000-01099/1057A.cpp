@@ -5,7 +5,7 @@ using namespace std;
 
 const int MOD = 1e9 + 7;
 
-void FastIO()
+void fastIo()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
@@ -15,7 +15,7 @@ void FastIO()
 class Solution
 {
 public:
-	void Solve(int n, vector<int>& vec)
+	void solve(int n, vector<int>& vec)
 	{
 		bool flag = false;
 		int node = n;
@@ -38,7 +38,7 @@ public:
 
 int main()
 {
-	FastIO();
+	fastIo();
 	int n;
 	cin >> n;
 	vector<int> vec(n + 1, -1);
@@ -51,5 +51,5 @@ int main()
 	}
 	vector<int> result;
 	Solution solution;
-	solution.Solve(n, vec);
+	solution.solve(n, vec);
 }

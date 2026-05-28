@@ -27,13 +27,15 @@ Problem Description
 #include <limits>
 #include <iomanip>
 #include <functional>
+#include <cstring>
+#include <climits>
 
 using namespace std;
 
 const int MOD = 1e9 + 7;
 
 // Fast I/O
-void FastIO()
+void fastIo()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
@@ -43,7 +45,7 @@ void FastIO()
 class Solution
 {
 private:
-	long long GCD(long long a, long long b)
+	long long gcd(long long a, long long b)
 	{
 		while (b)
 		{
@@ -53,9 +55,9 @@ private:
 		return a;
 	}
 
-	long long LCM(long long a, long long b)
+	long long lcm(long long a, long long b)
 	{
-		return a / this->GCD(a, b) * b;
+		return a / this->gcd(a, b) * b;
 	}
 
 	long long Power(long long base, long long exp, long long mod = MOD)
@@ -73,7 +75,7 @@ private:
 	}
 
 public:
-	void Solve()
+	void solve()
 	{
 
 	}
@@ -81,7 +83,7 @@ public:
 
 int main()
 {
-	FastIO();
+	fastIo();
 
 
 	return 0;

@@ -47,7 +47,7 @@ using namespace std;
 
 const int MOD = 1e9 + 7;
 
-void FastIO()
+void fastIo()
 {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
@@ -57,7 +57,7 @@ void FastIO()
 class Solution
 {
 public:
-	void Solve(int n, int k, string s)
+	void solve(int n, int k, string s)
 	{
 		int countOnes = 0;
 		for (char c : s)
@@ -73,7 +73,7 @@ public:
 
 int main()
 {
-	FastIO();
+	fastIo();
 	int t;
 	cin >> t;
 	Solution solution;
@@ -84,7 +84,7 @@ int main()
 	while (t--)
 	{
 		cin >> n >> k >> s;
-		solution.Solve(n, k, s);
+		solution.solve(n, k, s);
 	}
 
 	return 0;
