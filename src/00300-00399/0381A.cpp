@@ -83,7 +83,7 @@ private:
 		return a / this->gcd(a, b) * b;
 	}
 
-	long long Power(long long base, long long exp, long long mod = MOD)
+	long long power(long long base, long long exp, long long mod = MOD)
 	{
 		long long result = 1;
 		base %= mod;
