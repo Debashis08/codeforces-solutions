@@ -41,6 +41,7 @@ For each test case, output a single line containing n+1 integers - the number of
 #include<map>
 #include<set>
 using namespace std;
+using ll = long long;
 
 const int MOD = 1e9 + 7;
 
