@@ -1,0 +1,14 @@
+Test Case 1:
+Input:
+1
+++X
+Output:
+1
+
+Test Case 2:
+Input:
+2
+X++
+--X
+Output:
+0
