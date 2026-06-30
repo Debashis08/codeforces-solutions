@@ -1,0 +1,11 @@
+Test Case 1:
+Input:
+3
+12 2
+6 7
+99 79
+
+Output:
+YES
+NO
+NO
