@@ -1,0 +1,20 @@
+Test Case 1:
+Input:
+5
+4 2
+1010
+3 2
+111
+3 3
+111
+3 1
+110
+1 1
+1
+
+Output:
+YES
+NO
+NO
+YES
+NO

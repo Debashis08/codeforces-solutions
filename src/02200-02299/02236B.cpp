@@ -75,16 +75,51 @@ private:
 	}
 
 public:
-	void solve()
+	void isPossibleToWin(ll n, ll k, string s)
 	{
+		vector<ll> chainOnes(k, 0);
+		for (int i = 0; i < s.size(); i++)
+		{
+			if (s[i] == '1')
+			{
+				chainOnes[i % k]++;
+			}
+		}
 
+		bool isPossible = true;
+		for (auto& it : chainOnes)
+		{
+			if (it % 2 != 0)
+			{
+				isPossible = false;
+				break;
+			}
+		}
+
+		if (isPossible)
+		{
+			cout << "YES" << "\n";
+		}
+		else
+		{
+			cout << "NO" << "\n";
+		}
 	}
 };
 
 int main()
 {
 	fastIo();
-
-
+	int t;
+	ll n, k;
+	string s;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n >> k;
+		cin >> s;
+		sol.isPossibleToWin(n, k, s);
+	}
 	return 0;
 }

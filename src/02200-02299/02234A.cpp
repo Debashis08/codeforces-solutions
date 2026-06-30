@@ -75,16 +75,50 @@ private:
 	}
 
 public:
-	void solve()
+	void solve(vector<int>& nums)
 	{
+		int n = nums.size();
+		sort(nums.begin(), nums.end(), greater<int>());
+		bool isValid = true;
+		for (int i = 0; i < n - 2; i++)
+		{
+			if ((nums[i] % nums[i + 1]) != nums[i + 2])
+			{
+				isValid = false;
+				break;
+			}
+		}
 
+		if (isValid)
+		{
+			cout << nums[0] << " " << nums[1] << "\n";
+		}
+		else
+		{
+			cout << -1 << "\n";
+		}
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t;
+	Solution sol;
+	vector<int> nums;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		int n,x;
+		cin >> n;
+		nums.clear();
+		for (int j = 0; j < n; j++)
+		{
+			cin >> x;
+			nums.push_back(x);
+		}
+		sol.solve(nums);
+	}
 
 	return 0;
 }

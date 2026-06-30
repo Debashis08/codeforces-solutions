@@ -75,16 +75,38 @@ private:
 	}
 
 public:
-	void solve()
+	void solve(int n, int k)
 	{
-
+		ll maxPopCount = 0;
+		for (int j = 0; j < 30; j++)
+		{
+			ll cost = 1LL << j;
+			if (n >= cost)
+			{
+				ll take = min((ll)k, n / cost);
+				maxPopCount += take;
+				n -= take * cost;
+			}
+			else
+			{
+				break;
+			}
+		}
+		cout << maxPopCount << "\n";
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t, n, k;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n >> k;
+		sol.solve(n, k);
+	}
 
 	return 0;
 }

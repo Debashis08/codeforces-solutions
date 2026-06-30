@@ -75,16 +75,34 @@ private:
 	}
 
 public:
-	void solve()
+	void solve(ll n)
 	{
-
+		vector<ll> possiblePalindromes = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22 };
+		for (ll a : possiblePalindromes)
+		{
+			if (a <= n && a % 12 == n % 12)
+			{
+				ll b = n - a;
+				cout << a << " " << b << "\n";
+				return;
+			}
+		}
+		cout << -1 << "\n";
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		ll n;
+		cin >> n;
+		sol.solve(n);
+	}
 
 	return 0;
 }

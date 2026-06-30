@@ -75,16 +75,68 @@ private:
 	}
 
 public:
-	void solve()
+	int findMaxFriends(string u, int n, int x, int s)
 	{
+		vector<int> table(x + 1, -1);
+		table[0] = 0;
+		for (int i = 0; i < n; i++)
+		{
+			char c = u[i];
+			vector<int> nextTable = table;
+			for (int j = 0; j <= x; j++)
+			{
+				if (table[j] == -1)
+				{
+					continue;
+				}
+				if ((c == 'I' || c == 'A') && j + 1 <= x)
+				{
+					if (table[j] + 1 > nextTable[j + 1])
+					{
+						nextTable[j + 1] = table[j] + 1;
+					}
+				}
+				if ((c == 'E' || c == 'A') && j > 0)
+				{
+					if (table[j] < j * s)
+					{
+						if (table[j] + 1 > nextTable[j])
+						{
+							nextTable[j] = table[j] + 1;
+						}
+					}
+				}
+			}
+			table = nextTable;
+		}
 
+		int maxSeated = INT_MIN;
+		for (int j = 0; j <= x; j++)
+		{
+			if (table[j] > maxSeated)
+			{
+				maxSeated = table[j];
+			}
+		}
+
+		return maxSeated;
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t;
+	cin >> t;
+	int n, x, s;
+	string u;
+	Solution sol;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n >> x >> s;
+		cin >> u;
+		cout << sol.findMaxFriends(u, n, x, s) << endl;
+	}
 
 	return 0;
 }

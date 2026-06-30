@@ -32,7 +32,7 @@ Problem Description
 using namespace std;
 using ll = long long;
 
-const int MOD = 1e9 + 7;
+const int MOD = 998244353;
 
 // Fast I/O
 void fastIo()
@@ -67,24 +67,37 @@ private:
 		while (exp > 0)
 		{
 			if (exp & 1)
-				result = result * base % mod;
-			base = base * base % mod;
+				result = (result * base) % mod;
+			base = (base * base) % mod;
 			exp >>= 1;
 		}
 		return result;
 	}
 
 public:
-	void solve()
+	void solve(ll n, ll m, ll r, ll c)
 	{
+		ll totalVariables = n * m;
+		ll equations = (n - r + 1) * (m - c + 1);
+		ll freeVariables = totalVariables - equations;
 
+		ll exp = freeVariables % (MOD-1);
+		ll result = this->power(2, exp);
+		cout << result << "\n";
 	}
 };
 
 int main()
 {
 	fastIo();
-
-
+	int t;
+	ll n, m, r, c;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n >> m >> r >> c;
+		sol.solve(n, m, r, c);
+	}
 	return 0;
 }

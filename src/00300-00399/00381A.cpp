@@ -52,8 +52,8 @@ In the first sample Sereja will take cards with numbers 10 and 2, so Sereja's su
 #include <limits>
 #include <iomanip>
 #include <functional>
-
 using namespace std;
+using ll = long long;
 
 const int MOD = 1e9 + 7;
 
@@ -68,7 +68,7 @@ void fastIo()
 class Solution
 {
 private:
-	long long gcd(long long a, long long b)
+	ll gcd(ll a, ll b)
 	{
 		while (b)
 		{
@@ -78,14 +78,14 @@ private:
 		return a;
 	}
 
-	long long lcm(long long a, long long b)
+	ll lcm(ll a, ll b)
 	{
 		return a / this->gcd(a, b) * b;
 	}
 
-	long long power(long long base, long long exp, long long mod = MOD)
+	ll power(ll base, ll exp, ll mod = MOD)
 	{
-		long long result = 1;
+		ll result = 1;
 		base %= mod;
 		while (exp > 0)
 		{

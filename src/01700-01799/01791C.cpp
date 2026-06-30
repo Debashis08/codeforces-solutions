@@ -1,7 +1,7 @@
 /*
 Tags
 
-
+two-pointer
 
 ----------------------------------------------------------------------------------------------------------------------------
 
@@ -75,16 +75,40 @@ private:
 	}
 
 public:
-	void solve()
+	int findShortestPossibleString(string s, int size)
 	{
-
+		int left = 0;
+		int right = size - 1;
+		while (left <= right)
+		{
+			if (s[left] != s[right])
+			{
+				size -= 2;
+				left++;
+				right--;
+			}
+			else
+			{
+				break;
+			}
+		}
+		return size;
 	}
 };
 
 int main()
 {
 	fastIo();
-
+    int t,n;
+	string s;
+	cin >> t;
+	Solution sol;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n;
+		cin >> s;
+		cout << sol.findShortestPossibleString(s, n) << endl;
+	}
 
 	return 0;
 }

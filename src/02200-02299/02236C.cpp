@@ -75,16 +75,68 @@ private:
 	}
 
 public:
-	void solve()
+	int findMinOperations(ll a, ll b, ll x)
 	{
+		if (a == b)
+		{
+			return 0;
+		}
+		
+		vector<pair<ll, ll>> pathA;
+		vector<pair<ll, ll>> pathB;
+		ll currA = a;
+		ll currB = b;
+		ll opsACount = 0;
+		ll opsBCount = 0;
+		while (true)
+		{
+			pathA.push_back({ currA, opsACount });
+			if (currA == 0)
+			{
+				break;
+			}
+			currA /= x;
+			opsACount++;
+		}
 
+		while (true)
+		{
+			pathB.push_back({ currB, opsBCount });
+			if (currB == 0)
+			{
+				break;
+			}
+			currB /= x;
+			opsBCount++;
+		}
+
+		ll minOps = LLONG_MAX;
+		for (auto& pa : pathA)
+		{
+			for (auto& pb : pathB)
+			{
+				ll currentOps = pa.second + pb.second + abs(pa.first - pb.first);
+				minOps = min(minOps, currentOps);
+			}
+		}
+
+		return minOps;
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		ll a, b, x;
+		cin >> a >> b >> x;
+		int result = sol.findMinOperations(a, b, x);
+		cout << result << "\n";
+	}
 
 	return 0;
 }

@@ -75,16 +75,32 @@ private:
 	}
 
 public:
-	void solve()
+	int findMinK(vector<int>& nums)
 	{
+		int maxheight = *max_element(nums.begin(), nums.end());
+		int minheight = *min_element(nums.begin(), nums.end());
 
+		return (maxheight + 1 - minheight);
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int n, t;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n;
+		vector<int> nums(n);
+		for (int j = 0; j < n; j++)
+		{
+			cin >> nums[j];
+		}
+		int result = sol.findMinK(nums);
+		cout << result << "\n";
+	}
 
 	return 0;
 }

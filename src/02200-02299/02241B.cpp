@@ -77,14 +77,30 @@ private:
 public:
 	void solve()
 	{
+		int x;
+		cin >> x;
 
+		int multiple = 1;
+		while (x > 0)
+		{
+			multiple *= 10;
+			x /= 10;
+		}
+		int y = multiple + 1;
+		cout << y << "\n";
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		sol.solve();
+	}
 
 	return 0;
 }

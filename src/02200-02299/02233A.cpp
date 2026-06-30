@@ -29,6 +29,7 @@ Problem Description
 #include <functional>
 #include <cstring>
 #include <climits>
+#include <cmath>
 using namespace std;
 using ll = long long;
 
@@ -75,16 +76,40 @@ private:
 	}
 
 public:
-	void solve()
+	void findMinHours(int n, int x, int y, int z)
 	{
+		int drop = ceil((n+x+y-1) / (x + y));
 
+		//drop case
+		int pick = INT_MAX;
+		int lines = z * x;
+		if (n <= lines)
+		{
+			pick = ceil((n+x-1) / x);
+		}
+		else
+		{
+			int remainingLines = n - lines;
+			int combinedSpeed = x + 10 * y;
+			pick = z + ((remainingLines + combinedSpeed - 1) / combinedSpeed);
+		}
+
+		cout << min(drop, pick) << "\n";
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t;
+	int n, x, y, z;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n >> x >> y >> z;
+		sol.findMinHours(n, x, y, z);
+	}
 
 	return 0;
 }

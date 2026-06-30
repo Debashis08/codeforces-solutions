@@ -75,16 +75,58 @@ private:
 	}
 
 public:
-	void solve()
+	void solve(vector<ll>& nums)
 	{
+		size_t n = nums.size();
+		ll modValue = 998244353;
+		ll sum = 0;
+		ll nonZeroCount = 0;
+		for (int i = 0; i < n; i++)
+		{
+			sum ^= nums[i];
+			if (nums[i] > 0)
+			{
+				nonZeroCount++;
+			}
+		}
 
+		if (nonZeroCount <= 1)
+		{
+			cout << 0 << "\n";
+			return;
+		}
+		ll result = 0;
+		if (sum == 0)
+		{
+			result = 1;
+		}
+		for (int i = 0; i < n; i++)
+		{
+			if (nums[i] > (nums[i] ^ sum))
+			{
+				result++;
+			}
+		}
+		cout << (result % modValue) << "\n";
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t, n;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n;
+		vector<ll> nums(n);
+		for (int j = 0; j < n; j++)
+		{
+			cin >> nums[j];
+		}
+		sol.solve(nums);
+	}
 
 	return 0;
 }

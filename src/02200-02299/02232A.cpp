@@ -75,16 +75,53 @@ private:
 	}
 
 public:
-	void solve()
+	int minGroupCalls(vector<int>& vec)
 	{
+		int n = vec.size();
+		int minCalls = INT_MAX;
+		for (int i = 0; i < n; i++)
+		{
+			int targetLocation = vec[i];
+			int leftCount = 0;
+			int rightCount = 0;
 
+			for (int j = 0; j < n; j++)
+			{
+				if (vec[j] < targetLocation)
+				{
+					leftCount++;
+				}
+				else if(vec[j]>targetLocation)
+				{
+					rightCount++;
+				}
+			}
+
+			int callCount = max(leftCount, rightCount);
+			minCalls = min(minCalls, callCount);
+		}
+		return minCalls;
 	}
 };
 
 int main()
 {
 	fastIo();
-
+    int t,n;
+    cin >> t;
+	Solution sol;
+	int x;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n;
+		vector<int> vec;
+		for (int j = 0; j < n; j++)
+		{
+			cin >> x;
+			vec.push_back(x);
+		}
+		cout << sol.minGroupCalls(vec) << endl;
+	}
 
 	return 0;
 }

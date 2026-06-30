@@ -75,16 +75,30 @@ private:
 	}
 
 public:
-	void solve()
+	void solve(ll n)
 	{
-
+		ll result = 0;
+		for (ll b = 1; b <= n; b++)
+		{
+			ll multiples = n / b;
+			result += (multiples * multiples);
+		}
+		cout << result << "\n";
 	}
 };
 
 int main()
 {
 	fastIo();
-
+	int t;
+	ll n;
+	Solution sol;
+	cin >> t;
+	for (int i = 0; i < t; i++)
+	{
+		cin >> n;
+		sol.solve(n);
+	}
 
 	return 0;
 }
