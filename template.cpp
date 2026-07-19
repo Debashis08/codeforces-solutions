@@ -3,8 +3,6 @@ Tags
 
 
 
-----------------------------------------------------------------------------------------------------------------------------
-
 Problem Description
 
 
@@ -45,22 +43,7 @@ void fastIo()
 class Solution
 {
 private:
-	ll gcd(ll a, ll b)
-	{
-		while (b)
-		{
-			a %= b;
-			swap(a, b);
-		}
-		return a;
-	}
-
-	ll lcm(ll a, ll b)
-	{
-		return a / this->gcd(a, b) * b;
-	}
-
-	ll power(ll base, ll exp, ll mod = MOD)
+	ll binPow(ll base, ll exp, ll mod = MOD)
 	{
 		ll result = 1;
 		base %= mod;
