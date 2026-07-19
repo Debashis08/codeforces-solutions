@@ -43,9 +43,7 @@ bool copyTemplate(const string& sourcePath, const string& destPath)
 
 int main()
 {
-    cout << "========================================\n";
-    cout << "      Codeforces File Generator         \n";
-    cout << "========================================\n\n";
+    cout << "Code and Tests File Generator\n";
 
     string inputId;
     cout << "Enter Problem ID (e.g., 282A, 1057A, 2232C1): ";
@@ -118,7 +116,6 @@ int main()
     bool txtSuccess = copyTemplate("template.txt", txtFile.string());
 
     // 7. Output results
-    cout << "\n----------------------------------------\n";
     if (cppSuccess && txtSuccess)
     {
         cout << "[SUCCESS] Files generated successfully!\n";
@@ -129,7 +126,6 @@ int main()
     {
         cout << "[FAILED] Make sure 'template.cpp' and 'template.txt' exist in the root directory.\n";
     }
-    cout << "----------------------------------------\n";
 
     return 0;
 }
