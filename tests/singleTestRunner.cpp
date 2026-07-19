@@ -4,6 +4,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
+#include <iomanip>
+#include <string>
 
 #ifdef _WIN32
 #define EXECUTABLE_NAME "solution_test_exec.exe"
@@ -25,24 +27,38 @@ public:
 class Helper
 {
 public:
-    std::string GetTestDataFolderPath(std::string filePath, const std::string& source, const std::string& target)
+    // Parses the alphanumeric ID and generates 5-digit padded folder and file names
+    bool ParseInput(const std::string& input, std::string& outFolder, std::string& outFileName)
     {
-        size_t pos = filePath.find(source);
-        if (pos != std::string::npos)
+        int firstNonDigit = 0;
+        while (firstNonDigit < input.length() && isdigit(input[firstNonDigit]))
         {
-            filePath.replace(pos, source.length(), target);
+            firstNonDigit++;
         }
-        return filePath;
-    }
 
-    std::string ChangeExtensionToTxt(const std::string& filepath)
-    {
-        size_t dotPos = filepath.find_last_of('.');
-        if (dotPos == std::string::npos)
+        if (firstNonDigit == 0)
         {
-            return filepath + ".txt";
+            return false; // Invalid input, no leading numbers
         }
-        return filepath.substr(0, dotPos) + ".txt";
+
+        int problemNum = std::stoi(input.substr(0, firstNonDigit));
+        std::string suffix = input.substr(firstNonDigit);
+
+        // Calculate 5-digit padded folder name
+        int lower = (problemNum / 100) * 100;
+        int upper = lower + 99;
+
+        std::ostringstream folderSs;
+        folderSs << std::setfill('0') << std::setw(5) << lower << "-"
+                 << std::setfill('0') << std::setw(5) << upper;
+        outFolder = folderSs.str();
+
+        // Calculate 5-digit padded file name
+        std::ostringstream fileSs;
+        fileSs << std::setfill('0') << std::setw(5) << problemNum << suffix;
+        outFileName = fileSs.str();
+
+        return true;
     }
 
     std::string Trim(std::string s)
@@ -57,29 +73,47 @@ public:
 
 int main()
 {
-    std::string sourceFilePath;
-    std::cout << "Enter full path to the C++ source file (.cpp): ";
-    std::getline(std::cin, sourceFilePath);
+    bool isAnyTestFailed = false;
+    std::string inputId;
 
-    // Derive test case file path
+    std::cout << "Enter Problem ID (e.g., 282A, 1057A, 2232C1): ";
+    if (!(std::cin >> inputId))
+    {
+        std::cerr << COLOR_RED_BOLD << "[ERROR] Invalid input." << COLOR_RESET << "\n";
+        return 1;
+    }
+
     Helper helper;
-    std::string testCaseFilePath = helper.GetTestDataFolderPath(sourceFilePath, "src\\", "tests\\");
-    testCaseFilePath = helper.ChangeExtensionToTxt(testCaseFilePath);
+    std::string folderName, fileName;
+    
+    if (!helper.ParseInput(inputId, folderName, fileName))
+    {
+        std::cerr << COLOR_RED_BOLD << "[ERROR] Problem ID must start with a number." << COLOR_RESET << "\n";
+        return 1;
+    }
+
+    // Automatically construct paths based on the 5-digit repository structure
+    std::string sourceFilePath = "src/" + folderName + "/" + fileName + ".cpp";
+    std::string testCaseFilePath = "tests/" + folderName + "/" + fileName + ".txt";
+
+    std::cout << "Targeting Source: " << sourceFilePath << "\n";
+    std::cout << "Targeting Tests : " << testCaseFilePath << "\n\n";
+
+    // Check if the test case file actually exists before attempting compilation
+    std::ifstream inputFile(testCaseFilePath);
+    if (!inputFile)
+    {
+        std::cerr << COLOR_RED_BOLD << "[ERROR] Failed to open test case file: " << testCaseFilePath << COLOR_RESET << "\n";
+        return 1;
+    }
 
     // Compile the source code
-    std::string compileCommand = "g++ \"" + sourceFilePath + "\" -o " EXECUTABLE_NAME " 2> compile_errors.txt";
+    std::string compileCommand = "g++ -std=c++20 \"" + sourceFilePath + "\" -o " EXECUTABLE_NAME " 2> compile_errors.txt";
     int compileResult = std::system(compileCommand.c_str());
 
     if (compileResult != 0)
     {
-        std::cerr << "Compilation failed. See compile_errors.txt\n";
-        return 1;
-    }
-
-    std::ifstream inputFile(testCaseFilePath);
-    if (!inputFile)
-    {
-        std::cerr << "Failed to open test case file: " << testCaseFilePath << "\n";
+        std::cerr << COLOR_RED_BOLD << "Compilation failed. See compile_errors.txt" << COLOR_RESET << "\n";
         return 1;
     }
 
@@ -112,6 +146,12 @@ int main()
             testCases.push_back(testCase);
         }
     }
+    inputFile.close();
+
+    if (testCases.empty())
+    {
+        std::cout << "[WARNING] No test cases found in the file.\n";
+    }
 
     // Execute each test case
     for (size_t i = 0; i < testCases.size(); i++)
@@ -119,9 +159,9 @@ int main()
         std::string inputFileName = "temp_input.txt";
         std::string outputFileName = "temp_output.txt";
 
-        std::ofstream inputFile(inputFileName);
-        inputFile << testCases[i].inputBlock;
-        inputFile.close();
+        std::ofstream tempInput(inputFileName);
+        tempInput << testCases[i].inputBlock;
+        tempInput.close();
 
         std::string runCommand = std::string(EXECUTABLE_NAME) + " < " + inputFileName + " > " + outputFileName;
         std::system(runCommand.c_str());
@@ -132,6 +172,7 @@ int main()
         {
             ossActual << line << '\n';
         }
+        outputFile.close();
 
         std::string expected = helper.Trim(testCases[i].expectedOutputBlock);
         std::string actual = helper.Trim(ossActual.str());
@@ -145,6 +186,7 @@ int main()
             std::cout << "Test Case " << (i + 1) << ": " << COLOR_RED_BOLD << "Failed" << COLOR_RESET << '\n';
             std::cout << "Expected:\n" << expected << "\n";
             std::cout << "Got:\n" << actual << "\n";
+            isAnyTestFailed = true;
         }
     }
 
@@ -152,6 +194,7 @@ int main()
     std::remove("temp_input.txt");
     std::remove("temp_output.txt");
     std::remove("solution_test_exec.exe");
+    std::remove("solution_test_exec"); // Linux cleanup just in case
 
-    return 0;
+    return isAnyTestFailed ? 1 : 0;
 }
